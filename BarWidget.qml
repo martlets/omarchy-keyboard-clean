@@ -69,7 +69,7 @@ BarWidget {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: "󰠨"
+    text: "󱏐"
     active: root.locked
     dimmed: !root.locked
     useActiveColor: false

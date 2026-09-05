@@ -2,7 +2,7 @@
 
 An Omarchy bar control that locks the keyboard, the touchscreen, or both
 so you can wipe them without typing or tapping garbage. Click the spray
-icon, pick a mode, clean, click again to unlock. The mouse and trackpad
+bottle, pick a mode, clean, click again to unlock. The mouse and trackpad
 stay available the whole time.
 
 It is the same job as KeyboardCleanTool on a Mac, with a Stay Awake-style
@@ -16,7 +16,7 @@ Plugins run unsandboxed inside `omarchy-shell`. Read this repo first, then:
 omarchy plugin add https://github.com/martlets/omarchy-keyboard-clean.git --enable
 ```
 
-That places a spray icon in the center of the bar. To sit it next to Stay
+That places a spray-bottle icon in the center of the bar. To sit it next to Stay
 Awake:
 
 ```bash

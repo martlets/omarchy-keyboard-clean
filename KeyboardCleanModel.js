@@ -234,7 +234,7 @@ function modeChoices() {
     },
     {
       value: "both",
-      icon: "󰠨",
+      icon: "󱏐",
       label: "Keyboard + Screen",
       description: "Lock keys and the touchscreen. Mouse stays on."
     }
