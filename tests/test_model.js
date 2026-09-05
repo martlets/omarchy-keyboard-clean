@@ -31,6 +31,7 @@ const sample = {
 function testSafety() {
   assert.equal(model.isSafeDeviceName("at-translated-set-2-keyboard"), true)
   assert.equal(model.isSafeDeviceName("hid-sdw:0:0:01fa:4245:01"), true)
+  assert.equal(model.isSafeDeviceName("cust0000:00-3558:2003"), true)
   assert.equal(model.isSafeDeviceName(""), false)
   assert.equal(model.isSafeDeviceName("has space"), false)
   assert.equal(model.isSafeDeviceName("foo`id`"), false)
@@ -58,7 +59,7 @@ function testNeverLock() {
   assert.equal(model.isNeverLockKeyboard("dell-wmi-hotkeys"), false)
 }
 
-function testLockable() {
+function testLockableKeyboards() {
   const names = model.lockableKeyboardNames(sample)
   assert.deepEqual(names, [
     "hid-sdw:0:0:01fa:4245:01-consumer-control",
@@ -71,6 +72,18 @@ function testLockable() {
   assert.equal(names.indexOf("hl-virtual-keyboard-fcitx5"), -1)
   assert.equal(names.indexOf("ven_06cb:00-06cb:d01a-touchpad"), -1)
   assert.equal(names.indexOf("cust0000:00-3558:2003"), -1)
+}
+
+function testLockableTouch() {
+  assert.equal(model.hasUnlockPointer(sample), true)
+  assert.deepEqual(model.lockableTouchNames(sample), ["cust0000:00-3558:2003"])
+  assert.deepEqual(model.lockableTouchNames({ touch: sample.touch }), [])
+  assert.deepEqual(model.lockableNames(sample, "touch"), ["cust0000:00-3558:2003"])
+  assert.equal(model.lockableNames(sample, "keyboard").indexOf("cust0000:00-3558:2003"), -1)
+  const both = model.lockableNames(sample, "both")
+  assert.ok(both.indexOf("at-translated-set-2-keyboard") !== -1)
+  assert.ok(both.indexOf("cust0000:00-3558:2003") !== -1)
+  assert.equal(both.indexOf("ven_06cb:00-06cb:d01a-touchpad"), -1)
 }
 
 function testPointerCollision() {
@@ -87,8 +100,8 @@ function testLua() {
     'hl.device({ name = "at-translated-set-2-keyboard", enabled = false })'
   )
   assert.equal(
-    model.luaDeviceEnabled("hid-sdw:0:0:01fa:4245:01", true),
-    'hl.device({ name = "hid-sdw:0:0:01fa:4245:01", enabled = true })'
+    model.luaDeviceEnabled("cust0000:00-3558:2003", true),
+    'hl.device({ name = "cust0000:00-3558:2003", enabled = true })'
   )
 }
 
@@ -96,9 +109,10 @@ function testParse() {
   assert.equal(model.parseDevicesJson("{"), null)
   assert.equal(model.parseDevicesJson("[]"), null)
   assert.ok(model.parseDevicesJson(JSON.stringify(sample)))
-  const extra = model.newlyLockableNames(sample, ["at-translated-set-2-keyboard"])
+  const extra = model.newlyLockableNames(sample, ["at-translated-set-2-keyboard"], "both")
   assert.ok(extra.indexOf("at-translated-set-2-keyboard") === -1)
   assert.ok(extra.indexOf("dell-wmi-hotkeys") !== -1)
+  assert.ok(extra.indexOf("cust0000:00-3558:2003") !== -1)
 }
 
 function testElapsedAndState() {
@@ -106,31 +120,39 @@ function testElapsedAndState() {
   assert.equal(model.formatElapsed(1000), "0:01")
   assert.equal(model.formatElapsed(61000), "1:01")
   assert.equal(model.formatElapsed(-20), "0:00")
-  assert.equal(model.tooltipFor(false, 0), "Lock Keyboard to Clean")
-  assert.equal(model.tooltipFor(true, 5000), "Unlock Keyboard · locked 0:05")
+  assert.equal(model.tooltipFor(false, 0, "both"), "Clean Keyboard or Screen")
+  assert.equal(model.tooltipFor(true, 5000, "touch"), "Unlock Touchscreen · locked 0:05")
   assert.equal(model.clampTimeoutSeconds(12, 2700, 60, 3600), 60)
   assert.equal(model.clampTimeoutSeconds(9000, 2700, 60, 3600), 3600)
   assert.equal(model.clampTimeoutSeconds("nope", 2700, 60, 3600), 2700)
+  assert.equal(model.normalizeMode("nope"), "both")
+  assert.equal(model.modeLabel("keyboard"), "Keyboard")
+  assert.equal(model.modeChoices().length, 3)
 
   const state = model.parseState(JSON.stringify({
     version: 1,
     locked: true,
+    mode: "touch",
     generation: 3,
     pid: 9,
-    devices: ["at-translated-set-2-keyboard", "bad name", "at-translated-set-2-keyboard"]
+    devices: ["cust0000:00-3558:2003", "bad name", "cust0000:00-3558:2003"]
   }))
   assert.equal(state.locked, true)
-  assert.deepEqual(state.devices, ["at-translated-set-2-keyboard"])
+  assert.equal(state.mode, "touch")
+  assert.deepEqual(state.devices, ["cust0000:00-3558:2003"])
   assert.equal(model.parseState('{"version":2}'), null)
 }
 
 function testRejectsMiceOnlyPayload() {
   assert.deepEqual(model.lockableKeyboardNames({ mice: sample.mice }), [])
+  assert.equal(model.emptyLockError("touch", { touch: sample.touch }), "need a mouse or trackpad to unlock")
+  assert.equal(model.emptyLockError("keyboard", sample), "no lockable keyboards found")
 }
 
 testSafety()
 testNeverLock()
-testLockable()
+testLockableKeyboards()
+testLockableTouch()
 testPointerCollision()
 testLua()
 testParse()

@@ -20,6 +20,7 @@ Item {
   property bool locked: false
   property bool busy: false
   property string phase: "idle"
+  property string mode: "both"
   property var lockedDevices: []
   property int generation: 0
   property int shellPid: 0
@@ -40,6 +41,7 @@ Item {
       locked: root.locked,
       busy: root.busy,
       phase: root.phase,
+      mode: root.mode,
       elapsed: root.elapsedLabel,
       devices: root.lockedDevices,
       error: root.lastError,
@@ -56,6 +58,7 @@ Item {
     if (!statePath || !stateFile.path) return
     var payload = Model.buildState({
       locked: locked === true,
+      mode: root.mode,
       generation: root.generation,
       pid: root.shellPid,
       startedAt: new Date().toISOString(),
@@ -104,19 +107,20 @@ Item {
     else if (root.phase === "relock") finishRelock()
   }
 
-  function startLock() {
+  function startLock(mode) {
     if (root.locked || root.busy) return "busy"
     if (!root.runtimeDir) {
       setError("XDG_RUNTIME_DIR is missing")
       return "error"
     }
 
+    root.mode = Model.normalizeMode(mode)
     root.busy = true
     root.phase = "locking"
     root.pendingUnlock = false
     root.lockedDevices = []
     setError("")
-    logEvent("lock-start")
+    logEvent("lock-start " + root.mode)
     if (!devicesProc.running) devicesProc.running = true
     return "locking"
   }
@@ -129,11 +133,11 @@ Item {
     }
     if (root.phase !== "locking") return
 
-    var names = Model.lockableKeyboardNames(devices)
+    var names = Model.lockableNames(devices, root.mode)
     if (names.length === 0) {
       root.busy = false
       root.phase = "idle"
-      setError("no lockable keyboards found")
+      setError(Model.emptyLockError(root.mode, devices))
       return
     }
 
@@ -157,7 +161,7 @@ Item {
     root.elapsedLabel = "0:00"
     writeState(true)
     watchdogStartTimer.restart()
-    logEvent("locked " + root.lockedDevices.length)
+    logEvent("locked " + root.lockedDevices.length + " " + root.mode)
   }
 
   function startUnlock(reason) {
@@ -189,7 +193,7 @@ Item {
   }
 
   function applyRelock(devices) {
-    var extra = Model.newlyLockableNames(devices, root.lockedDevices)
+    var extra = Model.newlyLockableNames(devices, root.lockedDevices, root.mode)
     if (extra.length === 0) {
       root.phase = "locked"
       root.busy = false
@@ -230,7 +234,7 @@ Item {
 
   function toggle() {
     if (root.locked || root.phase === "locking") return startUnlock("toggle")
-    return startLock()
+    return startLock(root.mode || "both")
   }
 
   function recoverOrphanedLock() {
@@ -243,6 +247,7 @@ Item {
     if (!state || state.locked !== true) return
     logEvent("recover-orphan")
     root.lockedDevices = state.devices
+    root.mode = state.mode || "both"
     root.generation = Math.max(root.generation, state.generation)
     root.phase = "unlocking"
     root.busy = true
@@ -306,7 +311,7 @@ Item {
   Process {
     id: inhibitProc
     running: root.locked
-    command: ["systemd-inhibit", "--what=idle:sleep", "--who=Keyboard Clean", "--why=Cleaning keyboard", "--mode=block", "sleep", "infinity"]
+    command: ["systemd-inhibit", "--what=idle:sleep", "--who=Keyboard Clean", "--why=Cleaning input devices", "--mode=block", "sleep", "infinity"]
   }
 
   FileView {
@@ -360,7 +365,19 @@ Item {
     }
 
     function lock(): string {
-      return root.startLock()
+      return root.startLock("both")
+    }
+
+    function lockKeyboard(): string {
+      return root.startLock("keyboard")
+    }
+
+    function lockTouch(): string {
+      return root.startLock("touch")
+    }
+
+    function lockBoth(): string {
+      return root.startLock("both")
     }
 
     function unlock(): string {

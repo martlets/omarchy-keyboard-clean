@@ -1,12 +1,12 @@
 # Keyboard Clean
 
-An Omarchy bar toggle that locks the keyboard so you can wipe the keys
-without typing garbage. Click it on, clean, click it off. The mouse and
-trackpad stay available the whole time.
+An Omarchy bar control that locks the keyboard, the touchscreen, or both
+so you can wipe them without typing or tapping garbage. Click the spray
+icon, pick a mode, clean, click again to unlock. The mouse and trackpad
+stay available the whole time.
 
-It is the same job as KeyboardCleanTool on a Mac, with the same kind of
-control as Omarchy's Stay Awake coffee mug: one icon, click to arm, click
-to clear.
+It is the same job as KeyboardCleanTool on a Mac, with a Stay Awake-style
+bar control and a small menu for which surface you want frozen.
 
 ## Install
 
@@ -16,8 +16,8 @@ Plugins run unsandboxed inside `omarchy-shell`. Read this repo first, then:
 omarchy plugin add https://github.com/martlets/omarchy-keyboard-clean.git --enable
 ```
 
-That places a keyboard-off icon in the center of the bar. To sit it next
-to Stay Awake:
+That places a spray icon in the center of the bar. To sit it next to Stay
+Awake:
 
 ```bash
 omarchy bar move io.github.martlets.keyboard-clean --after omarchy.indicators
@@ -25,20 +25,24 @@ omarchy bar move io.github.martlets.keyboard-clean --after omarchy.indicators
 
 ## Use
 
-- Click the icon to lock every real keyboard Hyprland is using.
-- Wipe the keys. Nothing you press is delivered to apps or to Hyprland binds.
+- Click the icon and choose **Keyboard**, **Touchscreen**, or **Keyboard + Screen**.
+- Wipe that surface. Frozen keys and taps are not delivered to apps or to
+  Hyprland binds.
 - Click the icon again to unlock.
-- Tooltip reads `Lock Keyboard to Clean`, then `Unlock Keyboard · locked M:SS`.
+- Tooltip reads `Clean Keyboard or Screen`, then `Unlock … · locked M:SS`.
 
 There is deliberately no keyboard shortcut to unlock. The pointer is the
-way out, the same as KeyboardCleanTool.
+way out. The touchscreen is only locked when a mouse or trackpad is still
+there to get you out.
 
 From a terminal or bind you already have:
 
 ```bash
 omarchy-shell io.github.martlets.keyboard-clean toggle
 omarchy-shell io.github.martlets.keyboard-clean status
-omarchy-shell io.github.martlets.keyboard-clean lock
+omarchy-shell io.github.martlets.keyboard-clean lockKeyboard
+omarchy-shell io.github.martlets.keyboard-clean lockTouch
+omarchy-shell io.github.martlets.keyboard-clean lockBoth
 omarchy-shell io.github.martlets.keyboard-clean unlock
 ```
 
@@ -47,12 +51,12 @@ omarchy-shell io.github.martlets.keyboard-clean unlock
 - It does not write Hyprland config. Device disables are runtime `hyprctl eval`
   calls and vanish on compositor restart.
 - It does not persist across reboot, logout, or a dead `omarchy-shell`.
-- It does not disable mice, touchpads, touchscreens, the power or sleep
-  buttons, the privacy kill-switch, or the fcitx virtual keyboard.
+- It does not disable mice, touchpads, the power or sleep buttons, the
+  privacy kill-switch, or the fcitx virtual keyboard.
 - It does not need sudo, install hooks, or a cloned first-party plugin.
 - It inhibits idle/sleep only while locked, then drops the inhibitor.
 
-If `omarchy-shell` crashes while the keyboard is locked, a tiny restore-only
+If `omarchy-shell` crashes while a surface is locked, a tiny restore-only
 watchdog in `XDG_RUNTIME_DIR` turns the devices back on. A 45-minute timer
 does the same if you forget it is on.
 

@@ -8,6 +8,7 @@ var DEVICE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/
 var NEVER_LOCK_RE = /^(hl-virtual-keyboard|power-button|sleep-button|lid-switch|video-bus|dell-privacy-driver|intel-hid-events|intel-hid-5-button-array)/
 
 var POINTER_LISTS = ["mice", "touch", "tablets"]
+var MODES = ["keyboard", "touch", "both"]
 
 function isSafeDeviceName(name) {
   return DEVICE_NAME_RE.test(String(name || ""))
@@ -15,6 +16,26 @@ function isSafeDeviceName(name) {
 
 function isNeverLockKeyboard(name) {
   return NEVER_LOCK_RE.test(String(name || ""))
+}
+
+function normalizeMode(mode) {
+  var value = String(mode || "both")
+  return MODES.indexOf(value) !== -1 ? value : "both"
+}
+
+function namesFromList(list) {
+  var names = []
+  var seen = {}
+  if (!Array.isArray(list)) return names
+
+  for (var i = 0; i < list.length; i++) {
+    var name = String(list[i] && list[i].name || "")
+    if (!isSafeDeviceName(name) || seen[name]) continue
+    seen[name] = true
+    names.push(name)
+  }
+
+  return names
 }
 
 function pointerNameSet(devices) {
@@ -31,6 +52,14 @@ function pointerNameSet(devices) {
   }
 
   return blocked
+}
+
+function mouseNames(devices) {
+  return namesFromList(devices && devices.mice)
+}
+
+function hasUnlockPointer(devices) {
+  return mouseNames(devices).length > 0
 }
 
 function parseDevicesJson(text) {
@@ -65,18 +94,65 @@ function lockableKeyboardNames(devices) {
   return names
 }
 
-function newlyLockableNames(devices, alreadyLocked) {
+function lockableTouchNames(devices) {
+  if (!hasUnlockPointer(devices)) return []
+
+  var blockedMice = {}
+  var mice = mouseNames(devices)
+  for (var i = 0; i < mice.length; i++) blockedMice[mice[i]] = true
+
+  var names = namesFromList(devices && devices.touch)
+  var out = []
+  for (var j = 0; j < names.length; j++) {
+    if (!blockedMice[names[j]]) out.push(names[j])
+  }
+  return out
+}
+
+function uniqueConcat(groups) {
+  var names = []
+  var seen = {}
+  for (var g = 0; g < groups.length; g++) {
+    var list = groups[g] || []
+    for (var i = 0; i < list.length; i++) {
+      if (seen[list[i]]) continue
+      seen[list[i]] = true
+      names.push(list[i])
+    }
+  }
+  return names
+}
+
+function lockableNames(devices, mode) {
+  mode = normalizeMode(mode)
+  var groups = []
+  if (mode === "keyboard" || mode === "both") groups.push(lockableKeyboardNames(devices))
+  if (mode === "touch" || mode === "both") groups.push(lockableTouchNames(devices))
+  return uniqueConcat(groups)
+}
+
+function newlyLockableNames(devices, alreadyLocked, mode) {
   var locked = {}
   if (Array.isArray(alreadyLocked)) {
     for (var i = 0; i < alreadyLocked.length; i++) locked[String(alreadyLocked[i])] = true
   }
 
-  var names = lockableKeyboardNames(devices)
+  var names = lockableNames(devices, mode)
   var extra = []
   for (var j = 0; j < names.length; j++) {
     if (!locked[names[j]]) extra.push(names[j])
   }
   return extra
+}
+
+function emptyLockError(mode, devices) {
+  mode = normalizeMode(mode)
+  if (mode === "touch") {
+    if (!hasUnlockPointer(devices)) return "need a mouse or trackpad to unlock"
+    return "no touchscreen found"
+  }
+  if (mode === "keyboard") return "no lockable keyboards found"
+  return "no lockable keyboards or touchscreen found"
 }
 
 function luaDeviceEnabled(name, enabled) {
@@ -116,6 +192,7 @@ function buildState(fields) {
   return {
     version: 1,
     locked: source.locked === true,
+    mode: normalizeMode(source.mode),
     generation: Math.max(0, Math.floor(Number(source.generation) || 0)),
     pid: Math.max(0, Math.floor(Number(source.pid) || 0)),
     startedAt: String(source.startedAt || ""),
@@ -134,23 +211,62 @@ function parseState(text) {
   }
 }
 
-function tooltipFor(locked, elapsedMs) {
-  if (!locked) return "Lock Keyboard to Clean"
-  return "Unlock Keyboard · locked " + formatElapsed(elapsedMs)
+function modeLabel(mode) {
+  mode = normalizeMode(mode)
+  if (mode === "keyboard") return "Keyboard"
+  if (mode === "touch") return "Touchscreen"
+  return "Keyboard + Screen"
+}
+
+function modeChoices() {
+  return [
+    {
+      value: "keyboard",
+      icon: "󰌌",
+      label: "Keyboard",
+      description: "Lock the keys. Mouse and screen stay on."
+    },
+    {
+      value: "touch",
+      icon: "󰍹",
+      label: "Touchscreen",
+      description: "Lock the screen. Mouse and keys stay on."
+    },
+    {
+      value: "both",
+      icon: "󰠨",
+      label: "Keyboard + Screen",
+      description: "Lock keys and the touchscreen. Mouse stays on."
+    }
+  ]
+}
+
+function tooltipFor(locked, elapsedMs, mode) {
+  if (!locked) return "Clean Keyboard or Screen"
+  return "Unlock " + modeLabel(mode) + " · locked " + formatElapsed(elapsedMs)
 }
 
 if (typeof module !== "undefined") {
   module.exports = {
     DEVICE_NAME_RE: DEVICE_NAME_RE,
+    MODES: MODES,
     NEVER_LOCK_RE: NEVER_LOCK_RE,
     buildState: buildState,
     clampTimeoutSeconds: clampTimeoutSeconds,
+    emptyLockError: emptyLockError,
     formatElapsed: formatElapsed,
+    hasUnlockPointer: hasUnlockPointer,
     isNeverLockKeyboard: isNeverLockKeyboard,
     isSafeDeviceName: isSafeDeviceName,
     lockableKeyboardNames: lockableKeyboardNames,
+    lockableNames: lockableNames,
+    lockableTouchNames: lockableTouchNames,
     luaDeviceEnabled: luaDeviceEnabled,
+    modeChoices: modeChoices,
+    modeLabel: modeLabel,
+    mouseNames: mouseNames,
     newlyLockableNames: newlyLockableNames,
+    normalizeMode: normalizeMode,
     parseDevicesJson: parseDevicesJson,
     parseState: parseState,
     pointerNameSet: pointerNameSet,
