@@ -25,11 +25,13 @@ omarchy bar move io.github.martlets.keyboard-clean --after omarchy.indicators
 
 ## Use
 
-- Click the icon and choose **Keyboard**, **Touchscreen**, or **Keyboard + Screen**.
-- Wipe that surface. Frozen keys and taps are not delivered to apps or to
-  Hyprland binds.
-- Click the icon again to unlock.
-- Tooltip reads `Clean Keyboard or Screen`, then `Unlock … · locked M:SS`.
+- Click the spray-bottle icon.
+- Choose **Keyboard**, **Touchscreen**, or **Keyboard + Screen**.
+- The icon turns the bar's active color while a lock is on. The menu header
+  reads `ON · KEYBOARD · 0:12` (or whichever mode is live), and that row is
+  marked **ON**.
+- Click the icon again and hit **Unlock** to stop. Mouse and trackpad stay
+  available the whole time.
 
 There is deliberately no keyboard shortcut to unlock. The pointer is the
 way out. The touchscreen is only locked when a mouse or trackpad is still

@@ -27,7 +27,6 @@ BarWidget {
   readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
 
   function open() {
-    if (root.locked) return
     if (panelLoader.item) panelLoader.item.open()
   }
 
@@ -40,10 +39,6 @@ BarWidget {
   }
 
   function togglePanel() {
-    if (root.locked) {
-      root.close()
-      return
-    }
     if (panelLoader.item) panelLoader.item.toggle()
   }
 
@@ -52,7 +47,6 @@ BarWidget {
 
   onBarChanged: injectPanel()
   onSettingsChanged: injectPanel()
-  onLockedChanged: if (locked) root.close()
 
   Loader {
     id: panelLoader
@@ -72,20 +66,12 @@ BarWidget {
     text: "󱏐"
     active: root.locked
     dimmed: !root.locked
-    useActiveColor: false
+    useActiveColor: true
     slotSize: Style.bar.statusSlot
     fontSize: Style.font.caption
     tooltipText: root.locked
-      ? "Unlock " + Model.modeLabel(root.mode) + " · locked " + root.elapsedLabel
+      ? "Cleaning " + Model.modeLabel(root.mode) + " · " + root.elapsedLabel
       : "Clean Keyboard or Screen"
-    onPressed: function() {
-      if (root.locked) {
-        root.close()
-        if (root.cleanService && typeof root.cleanService.startUnlock === "function")
-          root.cleanService.startUnlock("bar")
-        return
-      }
-      root.togglePanel()
-    }
+    onPressed: root.togglePanel()
   }
 }

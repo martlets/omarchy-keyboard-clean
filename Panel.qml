@@ -17,7 +17,11 @@ Panel {
     : (bar && bar.shell && bar.shell.serviceFor
       ? bar.shell.serviceFor(root.moduleName)
       : null)
-  readonly property var choices: Model.modeChoices()
+  readonly property bool locked: cleanService ? cleanService.locked === true : false
+  readonly property string mode: cleanService && cleanService.mode ? cleanService.mode : "both"
+  readonly property string elapsedLabel: cleanService && cleanService.elapsedLabel ? cleanService.elapsedLabel : "0:00"
+  readonly property var rows: Model.menuRows(root.locked, root.mode)
+  readonly property color urgent: bar ? bar.urgent : Color.urgent
   property int cursorIndex: 0
 
   function open() {
@@ -41,17 +45,23 @@ Panel {
   }
 
   function moveCursor(dy) {
-    var count = root.choices.length
+    var count = root.rows.length
     if (count === 0) return
     root.cursorIndex = (root.cursorIndex + dy + count) % count
   }
 
   function activateIndex(index) {
-    if (index < 0 || index >= root.choices.length) return
-    var choice = root.choices[index]
+    if (index < 0 || index >= root.rows.length) return
+    var row = root.rows[index]
     root.close()
-    if (root.cleanService && typeof root.cleanService.startLock === "function")
-      root.cleanService.startLock(choice.value)
+    if (!root.cleanService) return
+    if (row.value === "unlock" || (row.active === true && row.kind === "mode")) {
+      if (typeof root.cleanService.startUnlock === "function")
+        root.cleanService.startUnlock("menu")
+      return
+    }
+    if (typeof root.cleanService.startLock === "function")
+      root.cleanService.startLock(row.value)
   }
 
   KeyboardPanel {
@@ -61,7 +71,7 @@ Panel {
     bar: root.bar
     open: root.opened
     focusTarget: keyCatcher
-    contentWidth: panel.fittedContentWidth(Style.space(280))
+    contentWidth: panel.fittedContentWidth(Style.space(300))
     contentHeight: panel.fittedContentHeight(content.implicitHeight)
 
     PanelKeyCatcher {
@@ -79,16 +89,16 @@ Panel {
 
         Text {
           width: parent.width
-          text: "CLEAN"
-          color: Qt.darker(root.barForeground, 1.4)
+          text: Model.statusLabel(root.locked, root.mode, root.elapsedLabel).toUpperCase()
+          color: root.locked ? root.urgent : Qt.darker(root.barForeground, 1.4)
           font.family: root.bar ? root.bar.fontFamily : Style.font.family
           font.pixelSize: Style.font.caption
           font.bold: true
-          font.letterSpacing: 1.4
+          font.letterSpacing: 1.2
         }
 
         Repeater {
-          model: root.choices
+          model: root.rows
 
           CursorSurface {
             required property var modelData
@@ -97,6 +107,7 @@ Panel {
             implicitHeight: row.implicitHeight + Style.space(10)
             foreground: root.barForeground
             hasCursor: root.cursorIndex === index
+            current: modelData.active === true
 
             HoverHandler {
               onHoveredChanged: if (hovered) root.cursorIndex = index
@@ -120,23 +131,24 @@ Panel {
 
               Text {
                 text: modelData.icon
-                color: root.barForeground
+                color: modelData.kind === "unlock" ? root.urgent : root.barForeground
                 font.family: root.bar ? root.bar.fontFamily : Style.font.family
                 font.pixelSize: Style.font.body
                 anchors.verticalCenter: parent.verticalCenter
               }
 
               Column {
-                width: parent.width - parent.spacing - 28
+                width: parent.width - parent.spacing - 28 - (onBadge.visible ? onBadge.width : 0)
                 spacing: Style.space(1)
                 anchors.verticalCenter: parent.verticalCenter
 
                 Text {
                   width: parent.width
                   text: modelData.label
-                  color: root.barForeground
+                  color: modelData.kind === "unlock" ? root.urgent : root.barForeground
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.body
+                  font.bold: modelData.kind === "unlock" || modelData.active === true
                   elide: Text.ElideRight
                 }
 
@@ -148,6 +160,18 @@ Panel {
                   font.pixelSize: Style.font.caption
                   wrapMode: Text.WordWrap
                 }
+              }
+
+              Text {
+                id: onBadge
+                visible: modelData.active === true
+                text: "ON"
+                color: root.urgent
+                font.family: root.bar ? root.bar.fontFamily : Style.font.family
+                font.pixelSize: Style.font.caption
+                font.bold: true
+                font.letterSpacing: 1.1
+                anchors.verticalCenter: parent.verticalCenter
               }
             }
           }

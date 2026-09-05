@@ -241,9 +241,43 @@ function modeChoices() {
   ]
 }
 
+function menuRows(locked, mode) {
+  var rows = []
+  var current = normalizeMode(mode)
+  if (locked === true) {
+    rows.push({
+      value: "unlock",
+      icon: "󰌾",
+      label: "Unlock",
+      description: "Stop cleaning. Keys and screen work again.",
+      kind: "unlock",
+      active: false
+    })
+  }
+
+  var choices = modeChoices()
+  for (var i = 0; i < choices.length; i++) {
+    var active = locked === true && choices[i].value === current
+    rows.push({
+      value: choices[i].value,
+      icon: choices[i].icon,
+      label: choices[i].label,
+      description: active ? "On now." : choices[i].description,
+      kind: "mode",
+      active: active
+    })
+  }
+  return rows
+}
+
+function statusLabel(locked, mode, elapsed) {
+  if (!locked) return "Off"
+  return "On · " + modeLabel(mode) + " · " + String(elapsed || "0:00")
+}
+
 function tooltipFor(locked, elapsedMs, mode) {
   if (!locked) return "Clean Keyboard or Screen"
-  return "Unlock " + modeLabel(mode) + " · locked " + formatElapsed(elapsedMs)
+  return "Cleaning " + modeLabel(mode) + " · " + formatElapsed(elapsedMs) + " · click for Unlock"
 }
 
 if (typeof module !== "undefined") {
@@ -262,8 +296,10 @@ if (typeof module !== "undefined") {
     lockableNames: lockableNames,
     lockableTouchNames: lockableTouchNames,
     luaDeviceEnabled: luaDeviceEnabled,
+    menuRows: menuRows,
     modeChoices: modeChoices,
     modeLabel: modeLabel,
+    statusLabel: statusLabel,
     mouseNames: mouseNames,
     newlyLockableNames: newlyLockableNames,
     normalizeMode: normalizeMode,

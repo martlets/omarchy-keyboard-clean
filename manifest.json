@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.martlets.keyboard-clean",
   "name": "Keyboard Clean",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Ishan Shah",
   "license": "MIT",
   "description": "Lock the keyboard, the touchscreen, or both from the bar so you can wipe them without typing or tapping garbage. Mouse and trackpad stay available.",
@@ -16,7 +16,7 @@
   },
   "barWidget": {
     "displayName": "Keyboard Clean",
-    "description": "Click for a menu: lock the keyboard, the touchscreen, or both. Click again to unlock. Mouse stays available.",
+    "description": "Click for a menu: lock the keyboard, the touchscreen, or both. Unlock from the same menu. Mouse stays available.",
     "category": "System",
     "allowMultiple": false,
     "defaultSection": "center"
