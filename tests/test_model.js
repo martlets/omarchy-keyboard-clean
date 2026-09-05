@@ -1,5 +1,5 @@
 const assert = require("node:assert/strict")
-const model = require("../KeyboardCleanModel.js")
+const model = require("../StayCleanModel.js")
 
 const sample = {
   mice: [
@@ -120,7 +120,7 @@ function testElapsedAndState() {
   assert.equal(model.formatElapsed(1000), "0:01")
   assert.equal(model.formatElapsed(61000), "1:01")
   assert.equal(model.formatElapsed(-20), "0:00")
-  assert.equal(model.tooltipFor(false, 0, "both"), "Clean Keyboard or Screen")
+  assert.equal(model.tooltipFor(false, 0, "both"), "Stay Clean")
   assert.equal(model.tooltipFor(true, 5000, "touch"), "Cleaning Touchscreen · 0:05 · click for Unlock")
   assert.equal(model.clampTimeoutSeconds(12, 2700, 60, 3600), 60)
   assert.equal(model.clampTimeoutSeconds(9000, 2700, 60, 3600), 3600)

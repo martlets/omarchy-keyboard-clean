@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
-import "KeyboardCleanModel.js" as Model
+import "StayCleanModel.js" as Model
 
 Item {
   id: root
@@ -10,10 +10,10 @@ Item {
   property var shell: null
   property var manifest: null
 
-  readonly property string pluginId: (manifest && manifest.id) ? String(manifest.id) : "io.github.martlets.keyboard-clean"
+  readonly property string pluginId: (manifest && manifest.id) ? String(manifest.id) : "io.github.martlets.stay-clean"
   readonly property string pluginDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
   readonly property string runtimeDir: Quickshell.env("XDG_RUNTIME_DIR")
-  readonly property string statePath: runtimeDir ? runtimeDir + "/omarchy-keyboard-clean.lock.json" : ""
+  readonly property string statePath: runtimeDir ? runtimeDir + "/omarchy-stay-clean.lock.json" : ""
   readonly property string watchdogPath: pluginDir ? pluginDir + "/watchdog.py" : ""
   readonly property int timeoutSeconds: 2700
 
@@ -33,7 +33,7 @@ Item {
 
   function logEvent(event) {
     root.lastEvent = event
-    console.log("keyboard-clean " + event)
+    console.log("stay-clean " + event)
   }
 
   function statusJson() {
@@ -311,7 +311,7 @@ Item {
   Process {
     id: inhibitProc
     running: root.locked
-    command: ["systemd-inhibit", "--what=idle:sleep", "--who=Keyboard Clean", "--why=Cleaning input devices", "--mode=block", "sleep", "infinity"]
+    command: ["systemd-inhibit", "--what=idle:sleep", "--who=Stay Clean", "--why=Cleaning input devices", "--mode=block", "sleep", "infinity"]
   }
 
   FileView {
@@ -358,7 +358,7 @@ Item {
   }
 
   IpcHandler {
-    target: "io.github.martlets.keyboard-clean"
+    target: "io.github.martlets.stay-clean"
 
     function status(): string {
       return root.statusJson()

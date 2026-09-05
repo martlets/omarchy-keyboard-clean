@@ -1,26 +1,28 @@
-# Keyboard Clean
+# Stay Clean
 
 An Omarchy bar control that locks the keyboard, the touchscreen, or both
 so you can wipe them without typing or tapping garbage. Click the spray
 bottle, pick a mode, clean, click again to unlock. The mouse and trackpad
 stay available the whole time.
 
-It is the same job as KeyboardCleanTool on a Mac, with a Stay Awake-style
-bar control and a small menu for which surface you want frozen.
+It is the same job as KeyboardCleanTool on a Mac, as a Stay Awake-style
+bar control with a small menu for which surface you want frozen.
+
+MIT licensed. Plugins run unsandboxed inside `omarchy-shell`.
 
 ## Install
 
-Plugins run unsandboxed inside `omarchy-shell`. Read this repo first, then:
+Read this repo first, then:
 
 ```bash
-omarchy plugin add https://github.com/martlets/omarchy-keyboard-clean.git --enable
+omarchy plugin add https://github.com/martlets/omarchy-stay-clean.git --enable
 ```
 
 That places a spray-bottle icon in the center of the bar. To sit it next to Stay
 Awake:
 
 ```bash
-omarchy bar move io.github.martlets.keyboard-clean --after omarchy.indicators
+omarchy bar move io.github.martlets.stay-clean --after omarchy.indicators
 ```
 
 ## Use
@@ -40,12 +42,12 @@ there to get you out.
 From a terminal or bind you already have:
 
 ```bash
-omarchy-shell io.github.martlets.keyboard-clean toggle
-omarchy-shell io.github.martlets.keyboard-clean status
-omarchy-shell io.github.martlets.keyboard-clean lockKeyboard
-omarchy-shell io.github.martlets.keyboard-clean lockTouch
-omarchy-shell io.github.martlets.keyboard-clean lockBoth
-omarchy-shell io.github.martlets.keyboard-clean unlock
+omarchy-shell io.github.martlets.stay-clean toggle
+omarchy-shell io.github.martlets.stay-clean status
+omarchy-shell io.github.martlets.stay-clean lockKeyboard
+omarchy-shell io.github.martlets.stay-clean lockTouch
+omarchy-shell io.github.martlets.stay-clean lockBoth
+omarchy-shell io.github.martlets.stay-clean unlock
 ```
 
 ## What it will not do
@@ -62,10 +64,19 @@ If `omarchy-shell` crashes while a surface is locked, a tiny restore-only
 watchdog in `XDG_RUNTIME_DIR` turns the devices back on. A 45-minute timer
 does the same if you forget it is on.
 
+## Dependencies
+
+- [Omarchy](https://omarchy.org) / `omarchy-shell` (Quickshell)
+- `hyprctl` (Hyprland), used as argv only, never through a shell
+- `python3` (standard library only) for the restore-only watchdog
+- `systemd-inhibit` while a lock is active
+
+No extra packages, no network, no sudo.
+
 ## Remove
 
 ```bash
-omarchy plugin remove io.github.martlets.keyboard-clean
+omarchy plugin remove io.github.martlets.stay-clean
 ```
 
 If a lock was active, click the icon (or run `unlock`) before removing the

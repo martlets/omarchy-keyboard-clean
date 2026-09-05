@@ -1,12 +1,12 @@
 import QtQuick
 import qs.Commons
 import qs.Ui
-import "KeyboardCleanModel.js" as Model
+import "StayCleanModel.js" as Model
 
 Panel {
   id: root
-  moduleName: "io.github.martlets.keyboard-clean"
-  ipcTarget: "io.github.martlets.keyboard-clean"
+  moduleName: "io.github.martlets.stay-clean"
+  ipcTarget: "io.github.martlets.stay-clean"
   manageIpc: false
 
   property var anchorItem: null

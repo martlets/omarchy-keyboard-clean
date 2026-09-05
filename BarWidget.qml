@@ -1,11 +1,11 @@
 import QtQuick
 import qs.Ui
 import qs.Commons
-import "KeyboardCleanModel.js" as Model
+import "StayCleanModel.js" as Model
 
 BarWidget {
   id: root
-  moduleName: "io.github.martlets.keyboard-clean"
+  moduleName: "io.github.martlets.stay-clean"
 
   readonly property var cleanService: bar && bar.shell && bar.shell.serviceFor
     ? bar.shell.serviceFor(root.moduleName)
@@ -71,7 +71,7 @@ BarWidget {
     fontSize: Style.font.caption
     tooltipText: root.locked
       ? "Cleaning " + Model.modeLabel(root.mode) + " · " + root.elapsedLabel
-      : "Clean Keyboard or Screen"
+      : "Stay Clean"
     onPressed: root.togglePanel()
   }
 }

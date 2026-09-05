@@ -1,4 +1,4 @@
-// Pure helpers for Keyboard Clean. Qt-free so node can unit-test them.
+// Pure helpers for Stay Clean. Qt-free so node can unit-test them.
 
 var DEVICE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/
 
@@ -276,7 +276,7 @@ function statusLabel(locked, mode, elapsed) {
 }
 
 function tooltipFor(locked, elapsedMs, mode) {
-  if (!locked) return "Clean Keyboard or Screen"
+  if (!locked) return "Stay Clean"
   return "Cleaning " + modeLabel(mode) + " · " + formatElapsed(elapsedMs) + " · click for Unlock"
 }
 

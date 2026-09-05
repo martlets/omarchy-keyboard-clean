@@ -18,7 +18,7 @@ class WatchdogTests(unittest.TestCase):
         self.tmpdir = tempfile.TemporaryDirectory()
         self.runtime = Path(self.tmpdir.name) / "runtime"
         self.runtime.mkdir()
-        self.state = self.runtime / "omarchy-keyboard-clean.lock.json"
+        self.state = self.runtime / "omarchy-stay-clean.lock.json"
         self.hyprctl_log = Path(self.tmpdir.name) / "hyprctl.log"
         self.hyprctl = Path(self.tmpdir.name) / "hyprctl"
         self.hyprctl.write_text(
