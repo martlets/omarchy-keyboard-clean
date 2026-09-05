@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.martlets.keyboard-clean",
+  "name": "Keyboard Clean",
+  "version": "1.0.0",
+  "author": "Ishan Shah",
+  "license": "MIT",
+  "description": "Lock the keyboard from the bar so you can wipe the keys without typing garbage. Mouse and trackpad stay available.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Keyboard Clean",
+    "description": "Click to lock the keyboard while you clean it. Click again to unlock. Mouse stays available.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "center"
+  }
+}
