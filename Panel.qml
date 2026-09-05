@@ -23,9 +23,11 @@ Panel {
   readonly property var rows: Model.menuRows(root.locked, root.mode)
   readonly property color urgent: bar ? bar.urgent : Color.urgent
   property int cursorIndex: 0
+  property bool cursorActive: false
 
   function open() {
     root.cursorIndex = 0
+    root.cursorActive = false
     root.controller.show()
   }
 
@@ -47,6 +49,11 @@ Panel {
   function moveCursor(dy) {
     var count = root.rows.length
     if (count === 0) return
+    if (!root.cursorActive) {
+      root.cursorActive = true
+      root.cursorIndex = dy < 0 ? count - 1 : 0
+      return
+    }
     root.cursorIndex = (root.cursorIndex + dy + count) % count
   }
 
@@ -106,11 +113,15 @@ Panel {
             width: content.width
             implicitHeight: row.implicitHeight + Style.space(10)
             foreground: root.barForeground
-            hasCursor: root.cursorIndex === index
+            hasCursor: root.cursorActive && root.cursorIndex === index
             current: modelData.active === true
 
             HoverHandler {
-              onHoveredChanged: if (hovered) root.cursorIndex = index
+              onHoveredChanged: {
+                if (!hovered) return
+                root.cursorActive = true
+                root.cursorIndex = index
+              }
             }
 
             MouseArea {
