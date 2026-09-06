@@ -29,6 +29,9 @@ Panel {
     root.cursorIndex = 0
     root.cursorActive = false
     root.controller.show()
+    Qt.callLater(function() {
+      if (keyCatcher) keyCatcher.forceActiveFocus()
+    })
   }
 
   function close() {
@@ -71,14 +74,13 @@ Panel {
       root.cleanService.startLock(row.value)
   }
 
-  KeyboardPanel {
+  PopupCard {
     id: panel
     anchorItem: root.anchorItem
     owner: root.barIdentity
     bar: root.bar
     open: root.opened
-    centerOnBar: true
-    focusTarget: keyCatcher
+    triggerMode: "click"
     contentWidth: panel.fittedContentWidth(Style.space(320))
     contentHeight: panel.fittedContentHeight(menuColumn.implicitHeight, Style.space(420))
 
