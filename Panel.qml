@@ -77,9 +77,10 @@ Panel {
     owner: root.barIdentity
     bar: root.bar
     open: root.opened
+    centerOnBar: true
     focusTarget: keyCatcher
-    contentWidth: panel.fittedContentWidth(Style.space(300))
-    contentHeight: panel.fittedContentHeight(content.implicitHeight)
+    contentWidth: panel.fittedContentWidth(Style.space(320))
+    contentHeight: panel.fittedContentHeight(menuColumn.implicitHeight, Style.space(420))
 
     PanelKeyCatcher {
       id: keyCatcher
@@ -87,10 +88,10 @@ Panel {
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onMoveRequested: function(dx, dy) { root.moveCursor(dy) }
-      onActivateRequested: root.activateIndex(root.cursorIndex)
+      onActivateRequested: if (root.cursorActive) root.activateIndex(root.cursorIndex)
 
       Column {
-        id: content
+        id: menuColumn
         width: parent.width
         spacing: Style.space(4)
 
@@ -110,7 +111,7 @@ Panel {
           CursorSurface {
             required property var modelData
             required property int index
-            width: content.width
+            width: menuColumn.width
             implicitHeight: row.implicitHeight + Style.space(10)
             foreground: root.barForeground
             hasCursor: root.cursorActive && root.cursorIndex === index
@@ -149,7 +150,7 @@ Panel {
               }
 
               Column {
-                width: parent.width - parent.spacing - 28 - (onBadge.visible ? onBadge.width : 0)
+                width: Math.max(40, parent.width - parent.spacing - 28 - (onBadge.visible ? onBadge.width : 0))
                 spacing: Style.space(1)
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -169,7 +170,7 @@ Panel {
                   color: Qt.darker(root.barForeground, 1.45)
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.caption
-                  wrapMode: Text.WordWrap
+                  wrapMode: Text.Wrap
                 }
               }
 

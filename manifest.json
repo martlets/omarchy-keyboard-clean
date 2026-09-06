@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.martlets.stay-clean",
   "name": "Stay Clean",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": "Ishan Shah",
   "license": "MIT",
   "description": "Stay Awake for cleaning: lock the keyboard, the touchscreen, or both from the bar so you can wipe them without typing or tapping garbage. Mouse and trackpad stay available.",

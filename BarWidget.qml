@@ -72,6 +72,9 @@ BarWidget {
     tooltipText: root.locked
       ? "Cleaning " + Model.modeLabel(root.mode) + " · " + root.elapsedLabel
       : "Stay Clean"
-    onPressed: root.togglePanel()
+    onPressed: function(b) {
+      if (b === Qt.RightButton || b === Qt.MiddleButton) return
+      root.togglePanel()
+    }
   }
 }
