@@ -44,6 +44,7 @@ BarWidget {
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
+  property double lastLeftClickMs: 0
 
   onBarChanged: injectPanel()
   onSettingsChanged: injectPanel()
@@ -72,9 +73,24 @@ BarWidget {
     tooltipText: root.locked
       ? "Cleaning " + Model.modeLabel(root.mode) + " · " + root.elapsedLabel
       : "Stay Clean"
-    onPressed: function(b) {
-      if (b === Qt.RightButton || b === Qt.MiddleButton) return
-      root.togglePanel()
+    interactive: false
+  }
+
+  // Own the slot's clicks. A double-click on empty bar center toggles
+  // bar transparency; this MouseArea must not let those events through.
+  MouseArea {
+    anchors.fill: button
+    acceptedButtons: Qt.LeftButton
+    hoverEnabled: true
+    cursorShape: Qt.PointingHandCursor
+    onEntered: if (root.bar) root.bar.showTooltip(button, button.tooltipText)
+    onExited: if (root.bar) root.bar.hideTooltip(button)
+    onClicked: {
+      var now = Date.now()
+      if (now - root.lastLeftClickMs < 350) return
+      root.lastLeftClickMs = now
+      Qt.callLater(root.togglePanel)
     }
+    onDoubleClicked: function(mouse) { mouse.accepted = true }
   }
 }
