@@ -5,8 +5,9 @@ so you can wipe them without typing or tapping garbage. Click the spray
 bottle, pick a mode, clean, click again to unlock. The mouse and trackpad
 stay available the whole time.
 
-It is the same job as KeyboardCleanTool on a Mac, as a Stay Awake-style
-bar control with a small menu for which surface you want frozen.
+Unlike KeyboardCleanTool and keyboard-only cleaners, Stay Clean can also
+freeze the touchscreen. It is a Stay Awake-style bar control with a small
+menu for which surface you want frozen.
 
 MIT licensed. Plugins run unsandboxed inside `omarchy-shell`.
 
@@ -57,7 +58,7 @@ omarchy-shell io.github.martlets.stay-clean unlock
 - It does not persist across reboot, logout, or a dead `omarchy-shell`.
 - It does not disable mice, touchpads, the power or sleep buttons, the
   privacy kill-switch, or the fcitx virtual keyboard.
-- It does not need sudo, install hooks, or a cloned first-party plugin.
+- It does not need elevated privileges, install hooks, or a cloned first-party plugin.
 - It inhibits idle/sleep only while locked, then drops the inhibitor.
 
 If `omarchy-shell` crashes while a surface is locked, a tiny restore-only
